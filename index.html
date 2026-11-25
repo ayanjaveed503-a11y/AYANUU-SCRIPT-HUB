@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AYANUU HUB — Script & Loadstring Generator</title>
+  <style>
+    :root {
+      --bg: #09090d;
+      --card: rgba(20, 20, 28, 0.84);
+      --border: rgba(255, 255, 255, 0.11);
+      --accent: #dc283c;
+      --accent-soft: rgba(220, 40, 60, 0.18);
+      --text: #f5f5f7;
+      --muted: #a1a1aa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 15%, rgba(220, 40, 60, 0.22), transparent 40%),
+        radial-gradient(circle at 82% 85%, rgba(120, 20, 40, 0.18), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 28px 18px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 780px;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(220, 40, 60, 0.35);
+      color: #ff6b7b;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 0.94rem;
+      margin-bottom: 22px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #e4e4e7;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: #06060a;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.92rem;
+      outline: none;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      min-height: 170px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 11px;
+      padding: 11px 18px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.15s ease;
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .output-box {
+      background: #06060a;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 22px;
+    }
+
+    .output-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .output-title {
+      font-weight: 800;
+      font-size: 1rem;
+      color: #ff7585;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.82rem;
+      color: #e4e4e7;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .saved-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .saved-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .saved-item strong {
+      font-size: 0.92rem;
+    }
+
+    .saved-item small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #181822;
+      color: #fff;
+      border: 1px solid rgba(220, 40, 60, 0.55);
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: all 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <span class="badge">AYANUU HUB</span>
+    <h1>Paste Script &amp; Name</h1>
+    <p class="sub">Apna script name aur script code paste karein—yeh page usay clean format mein save aur copy karne ke liye ready kar deta hai.</p>
+
+    <div class="field">
+      <label for="scriptName">Script Name</label>
+      <input id="scriptName" type="text" placeholder="Example: AYANUU HUB" />
+    </div>
+
+    <div class="field">
+      <label for="rawUrl">Optional GitHub Raw Link (for Loadstring)</label>
+      <input id="rawUrl" type="text" placeholder="https://raw.githubusercontent.com/user/repo/main/script.lua" />
+    </div>
+
+    <div class="field">
+      <label for="scriptCode">Paste Your Script</label>
+      <textarea id="scriptCode" placeholder="-- Apna Lua / script code yahan paste karein..."></textarea>
+    </div>
+
+    <div class="row">
+      <button id="saveBtn" type="button">Save &amp; Preview</button>
+      <button id="copyScriptBtn" class="secondary" type="button">Copy Script</button>
+      <button id="copyLoaderBtn" class="secondary" type="button">Copy Loadstring</button>
+      <button id="clearBtn" class="secondary" type="button">Clear</button>
+    </div>
+
+    <section class="output-box">
+      <div class="output-head">
+        <div class="output-title" id="previewTitle">Untitled Script</div>
+        <span id="loaderPreview" style="font-size:0.78rem;color:#a1a1aa;"></span>
+      </div>
+      <pre id="previewCode">-- Preview will appear here</pre>
+    </section>
+
+    <section>
+      <label>Saved Scripts (Browser Local)</label>
+      <div id="savedList" class="saved-list"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast">Done!</div>
+
+  <script>
+    const nameInput = document.getElementById("scriptName");
+    const rawInput = document.getElementById("rawUrl");
+    const codeInput = document.getElementById("scriptCode");
+    const previewTitle = document.getElementById("previewTitle");
+    const loaderPreview = document.getElementById("loaderPreview");
+    const previewCode = document.getElementById("previewCode");
+    const savedList = document.getElementById("savedList");
+    const toast = document.getElementById("toast");
+
+    const STORAGE_KEY = "ayanuu_saved_scripts_v1";
+
+    function notify(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2000);
+    }
+
+    function getLoadstring() {
+      const url = rawInput.value.trim();
+      return url ? `loadstring(game:HttpGet("${url}"))()` : "";
+    }
+
+    function updatePreview() {
+      const name = nameInput.value.trim() || "Untitled Script";
+      const code = codeInput.value;
+      const ls = getLoadstring();
+
+      previewTitle.textContent = name;
+      loaderPreview.textContent = ls || "Add raw link for loadstring";
+      previewCode.textContent = code.trim() ? code : "-- No script pasted yet";
+    }
+
+    function loadSaved() {
+      let items = [];
+      try {
+        items = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        items = [];
+      }
+
+      savedList.innerHTML = "";
+      if (!items.length) {
+        savedList.innerHTML = '<small style="color:#a1a1aa;">No saved scripts yet.</small>';
+        return;
+      }
+
+      items.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = "saved-item";
+        div.innerHTML = `
+          <div>
+            <strong>${escapeHtml(item.name)}</strong>
+            <small>${escapeHtml(item.rawUrl || "No raw link")}</small>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="secondary" data-load="${idx}">Load</button>
+            <button type="button" class="secondary" data-del="${idx}">Delete</button>
+          </div>
+        `;
+        savedList.appendChild(div);
+      });
+
+      savedList.querySelectorAll("[data-load]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const item = items[Number(btn.dataset.load)];
+          if (!item) return;
+          nameInput.value = item.name;
+          rawInput.value = item.rawUrl || "";
+          codeInput.value = item.code || "";
+          updatePreview();
+          notify("Loaded into editor");
+        });
+      });
+
+      savedList.querySelectorAll("[data-del]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          items.splice(Number(btn.dataset.del), 1);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+          loadSaved();
+          notify("Deleted");
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    async function copyText(text, label) {
+      if (!text.trim()) {
+        notify(`Nothing to copy for ${label}`);
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        notify(`${label} copied!`);
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        notify(`${label} copied!`);
+      }
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      updatePreview();
+      const name = nameInput.value.trim() || "Untitled Script";
+      const rawUrl = rawInput.value.trim();
+      const code = codeInput.value;
+
+      let items = [];
+      try {
+        items = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        items = [];
+      }
+
+      items.unshift({ name, rawUrl, code });
+      items = items.slice(0, 15);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      loadSaved();
+      notify("Saved & updated!");
+    });
+
+    document.getElementById("copyScriptBtn").addEventListener("click", () => {
+      copyText(codeInput.value, "Script");
+    });
+
+    document.getElementById("copyLoaderBtn").addEventListener("click", () => {
+      copyText(getLoadstring(), "Loadstring");
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      nameInput.value = "";
+      rawInput.value = "";
+      codeInput.value = "";
+      updatePreview();
+      notify("Cleared");
+    });
+
+    nameInput.addEventListener("input", updatePreview);
+    rawInput.addEventListener("input", updatePreview);
+    codeInput.addEventListener("input", updatePreview);
+
+    updatePreview();
+    loadSaved();
+  </script>
+</body>
+</html>
